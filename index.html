@@ -8,6 +8,22 @@
       name="description"
       content="Portfolio d'Amayas Allouane, étudiant en Mastère Big Data & IA à HETIC. Posez vos questions à son assistant IA."
     />
+    <meta name="color-scheme" content="light dark" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232540f0'/%3E%3Ctext x='32' y='43' font-family='system-ui,sans-serif' font-size='28' font-weight='700' text-anchor='middle' fill='%23fff'%3EAA%3C/text%3E%3C/svg%3E"
+    />
+    <script>
+      // Applique le thème avant le premier rendu pour éviter un flash clair/sombre.
+      (function () {
+        var saved = null;
+        try {
+          saved = localStorage.getItem('theme');
+        } catch (e) {}
+        var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

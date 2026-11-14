@@ -9,11 +9,20 @@ export default function Assistant() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const logRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     const el = logRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, loading]);
+
+  // Le champ grandit avec le texte, jusqu'à une hauteur maximale fixée en CSS.
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight + 2}px`;
+  }, [draft]);
 
   async function ask(text) {
     const question = text.trim();
@@ -54,11 +63,18 @@ export default function Assistant() {
   return (
     <section className="notebook" aria-label={`Assistant de ${profile.name}`}>
       <header className="notebook-bar">
+        <span className="notebook-dots" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </span>
         <span className="notebook-file">amayas.ipynb</span>
-        {messages.length > 0 && (
+        {messages.length > 0 ? (
           <button type="button" className="notebook-clear" onClick={() => { setMessages([]); setError(''); }}>
-            Effacer l’historique
+            Effacer
           </button>
+        ) : (
+          <span className="notebook-kernel">Assistant IA</span>
         )}
       </header>
 
@@ -77,7 +93,7 @@ export default function Assistant() {
           const n = Math.floor(i / 2) + 1;
           const isUser = m.role === 'user';
           return (
-            <div className={`cell ${isUser ? 'cell-in' : ''}`} key={i}>
+            <div className={`cell ${isUser ? 'cell-in' : 'cell-out'}`} key={i}>
               <span className={`cell-tag ${isUser ? 'in' : 'out'}`}>{isUser ? `In [${n}]` : `Out [${n}]`}</span>
               <p className="cell-text">{m.content}</p>
             </div>
@@ -87,7 +103,12 @@ export default function Assistant() {
         {loading && (
           <div className="cell">
             <span className="cell-tag out">Out [*]</span>
-            <p className="cell-text cell-running">Exécution en cours</p>
+            <p className="cell-text cell-running">
+              <span className="sr-only">Exécution en cours</span>
+              <i aria-hidden="true" />
+              <i aria-hidden="true" />
+              <i aria-hidden="true" />
+            </p>
           </div>
         )}
       </div>
@@ -122,15 +143,28 @@ export default function Assistant() {
         </label>
         <textarea
           id="question"
-          rows={2}
+          ref={inputRef}
+          rows={1}
           value={draft}
           maxLength={1500}
           placeholder="Posez une question sur son parcours"
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={onKeyDown}
         />
-        <button type="submit" disabled={loading || !draft.trim()}>
-          Envoyer
+        <button type="submit" disabled={loading || !draft.trim()} aria-label="Envoyer la question">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 19V5m-6 6 6-6 6 6" />
+          </svg>
         </button>
       </form>
       <p className="notebook-hint">Entrée pour envoyer, Maj + Entrée pour aller à la ligne.</p>
