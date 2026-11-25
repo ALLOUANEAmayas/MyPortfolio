@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Assistant from './components/Assistant.jsx';
+import HeroCanvas from './components/HeroCanvas.jsx';
 import { profile } from './data/profile.js';
 
 const nav = [
   ['accueil', 'Accueil'],
   ['a-propos', 'À propos'],
-  ['projets', 'Projets'],
-  ['parcours', 'Parcours'],
+  ['experiences', 'Expériences'],
+  ['projet', 'Projet'],
+  ['formation', 'Formation'],
   ['contact', 'Contact'],
 ];
 
@@ -14,6 +16,7 @@ const icons = {
   sun: 'M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66 1.41-1.41M4.93 19.07l1.41-1.41m0-11.32L4.93 4.93m14.14 14.14-1.41-1.41M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z',
   moon: 'M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z',
   arrow: 'M5 12h14m-6-6 6 6-6 6',
+  external: 'M14 4h6v6m0-6L10 14M18 14v6H4V6h6',
   mail: 'M3 6.5h18v11H3zm0 .5 9 6.5L21 7',
   copy: 'M9 9h11v11H9zM5 15H4V4h11v1',
   check: 'm5 12.5 4.5 4.5L19 7.5',
@@ -95,12 +98,34 @@ function useReveal() {
   }, []);
 }
 
+function Chips({ items, label = 'Technologies' }) {
+  return (
+    <ul className="chips" aria-label={label}>
+      {items.map((t) => (
+        <li key={t}>{t}</li>
+      ))}
+    </ul>
+  );
+}
+
+function SectionHead({ index, title }) {
+  return (
+    <header className="block-head" data-reveal>
+      <p className="eyebrow">{index}</p>
+      <h2>{title}</h2>
+    </header>
+  );
+}
+
 const sectionIds = nav.map(([id]) => id);
 
 export default function App() {
   const [theme, toggleTheme] = useTheme();
   const active = useActiveSection(sectionIds);
   const [copied, setCopied] = useState(false);
+  const heroRef = useRef(null);
+  const copyRef = useRef(null);
+  const assistantRef = useRef(null);
   useReveal();
 
   async function copyEmail() {
@@ -144,54 +169,61 @@ export default function App() {
           >
             <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
           </button>
-          <a className="button" href={`mailto:${profile.email}`}>
+          <a className="button topbar-cta" href={`mailto:${profile.email}`}>
             Me contacter
           </a>
         </div>
       </header>
 
       <main id="contenu">
-        <section className="hero" id="accueil">
-          <div className="hero-copy">
-            <div className="identity">
-              <img src="/amayas.jpg" alt={`Portrait de ${profile.name}`} width="56" height="56" />
-              <div>
-                <p className="identity-name">{profile.name}</p>
-                <p className="identity-role">{profile.title}</p>
+        <section className="hero" id="accueil" ref={heroRef}>
+          <HeroCanvas heroRef={heroRef} sourceRef={copyRef} targetRef={assistantRef} />
+          <div className="hero-inner">
+            <div className="hero-copy" ref={copyRef}>
+              <div className="identity">
+                <img src="/amayas.jpg" alt={`Portrait de ${profile.name}`} width="56" height="56" />
+                <div>
+                  <p className="identity-name">{profile.name}</p>
+                  <p className="identity-role">{profile.title}</p>
+                </div>
               </div>
+              <h1>
+                Interrogez mon parcours comme une <em>base de données</em>.
+              </h1>
+              <p className="hero-lead">
+                {profile.tagline}. Mon assistant IA connaît mes expériences, mon projet data et mes compétences :
+                posez-lui vos questions.
+              </p>
+              <p className="hero-search">
+                <span className="pulse" aria-hidden="true" />
+                {profile.search}
+              </p>
+              <div className="hero-actions">
+                <a className="button button-large" href="#experiences">
+                  Voir les expériences <Icon name="arrow" />
+                </a>
+                <a className="button button-large button-ghost" href={profile.github} target="_blank" rel="noreferrer">
+                  GitHub
+                </a>
+                <a
+                  className="button button-large button-ghost"
+                  href={profile.linkedin}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  LinkedIn
+                </a>
+              </div>
+              <p className="hero-location">{profile.location}</p>
             </div>
-            <h1>
-              Interrogez mon parcours comme une <em>base de données</em>.
-            </h1>
-            <p className="hero-lead">
-              Je suis {profile.name}, futur {profile.title.toLowerCase()}. Mon assistant IA connaît mes projets, mes
-              compétences et mon parcours : posez-lui vos questions.
-            </p>
-            <p className="hero-search">
-              <span className="pulse" aria-hidden="true" />
-              {profile.search}
-            </p>
-            <div className="hero-actions">
-              <a className="button button-large" href="#projets">
-                Voir les projets <Icon name="arrow" />
-              </a>
-              <a className="button button-large button-ghost" href={profile.github} target="_blank" rel="noreferrer">
-                GitHub
-              </a>
-              <a className="button button-large button-ghost" href={profile.linkedin} target="_blank" rel="noreferrer">
-                LinkedIn
-              </a>
+            <div className="hero-assistant" ref={assistantRef}>
+              <Assistant />
             </div>
-            <p className="hero-location">{profile.location}</p>
           </div>
-          <Assistant />
         </section>
 
         <section className="block" id="a-propos">
-          <header className="block-head" data-reveal>
-            <p className="eyebrow">01</p>
-            <h2>À propos</h2>
-          </header>
+          <SectionHead index="01" title="À propos" />
           <div className="about-grid">
             <div className="about-text" data-reveal>
               {profile.about.map((para) => (
@@ -203,11 +235,7 @@ export default function App() {
                 <div key={s.group}>
                   <dt>{s.group}</dt>
                   <dd>
-                    <ul className="chips">
-                      {s.items.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
+                    <Chips items={s.items} label={s.group} />
                   </dd>
                 </div>
               ))}
@@ -215,40 +243,70 @@ export default function App() {
           </div>
         </section>
 
-        <section className="block" id="projets">
-          <header className="block-head" data-reveal>
-            <p className="eyebrow">02</p>
-            <h2>Projets</h2>
-          </header>
+        <section className="block" id="experiences">
+          <SectionHead index="02" title="Expériences" />
+          <ol className="xp">
+            {profile.experiences.map((x) => (
+              <li key={x.role} data-reveal>
+                <p className="xp-period">{x.period}</p>
+                <article className="xp-card">
+                  {x.label && <p className="tag">{x.label}</p>}
+                  <h3>{x.role}</h3>
+                  <p className="xp-company">
+                    {x.url ? (
+                      <a href={x.url} target="_blank" rel="noreferrer">
+                        {x.company} <Icon name="external" size={15} />
+                      </a>
+                    ) : (
+                      x.company
+                    )}
+                    <span>, {x.place}</span>
+                  </p>
+                  {x.highlights && (
+                    <ul className="kpis" aria-label="Chiffres clés">
+                      {x.highlights.map((h) => (
+                        <li key={h.value}>
+                          <strong>{h.value}</strong>
+                          <span>{h.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <ul className="xp-bullets">
+                    {x.bullets.map((b) => (
+                      <li key={b}>{b}</li>
+                    ))}
+                  </ul>
+                  <Chips items={x.stack} />
+                </article>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="block" id="projet">
+          <SectionHead index="03" title="Projet data" />
           <ul className="projects">
             {profile.projects.map((p) => (
               <li key={p.name} data-reveal>
-                <p className="project-kind">{p.kind}</p>
+                <p className="tag">{p.kind}</p>
                 <h3>{p.name}</h3>
                 <p className="project-summary">{p.summary}</p>
-                <ul className="chips" aria-label="Technologies">
-                  {p.stack.map((t) => (
-                    <li key={t}>{t}</li>
-                  ))}
-                </ul>
+                <Chips items={p.stack} />
               </li>
             ))}
           </ul>
         </section>
 
-        <section className="block" id="parcours">
-          <header className="block-head" data-reveal>
-            <p className="eyebrow">03</p>
-            <h2>Parcours</h2>
-          </header>
+        <section className="block" id="formation">
+          <SectionHead index="04" title="Formation" />
           <ol className="path">
-            {profile.path.map((step) => (
+            {profile.education.map((step) => (
               <li key={step.title} data-reveal>
                 <p className="path-period">{step.period}</p>
                 <div>
                   <h3>{step.title}</h3>
                   <p className="path-place">{step.place}</p>
-                  {step.detail && <p>{step.detail}</p>}
                 </div>
               </li>
             ))}
@@ -267,11 +325,12 @@ export default function App() {
           <div className="contact" data-reveal>
             <h2>Travaillons ensemble</h2>
             <p>
-              Une alternance en data à pourvoir, ou une question sur un projet ? Écrivez-moi, je réponds rapidement.
+              Une alternance en data à pourvoir dès décembre 2026, ou une question sur un projet ? Écrivez-moi, je
+              réponds rapidement.
             </p>
             <div className="contact-actions">
               <a className="button button-large button-amber" href={`mailto:${profile.email}`}>
-                <Icon name="mail" /> {profile.email}
+                <Icon name="mail" /> <span className="truncate">{profile.email}</span>
               </a>
               <button type="button" className="button button-large button-outline" onClick={copyEmail}>
                 <Icon name={copied ? 'check' : 'copy'} />
