@@ -93,6 +93,9 @@ export default async function handler(req, res) {
       .filter((block) => block.type === 'text')
       .map((block) => block.text)
       .join('\n')
+      // L'interface affiche du texte brut : on retire le Markdown éventuel (gras, titres).
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/^#{1,6}\s+/gm, '')
       .trim();
 
     return res.status(200).json({ reply: reply || "Je n'ai pas de réponse à cette question." });
